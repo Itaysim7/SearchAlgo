@@ -9,6 +9,7 @@ public class draft
 {
 	static boolean printTimeRunning=true;
 	static boolean printOpenList=true;
+	static int countVertices=1;
 	///////////////input function/////////////////
 	/**
 	 * The function fill the matrix with number and color
@@ -25,7 +26,10 @@ public class draft
 			  {
 				  int place=str.indexOf(",");
 				  if(str.substring(0,place).equals("_"))// if this is the empty cell
+				  {
 					  mat[i][j]=new cell(-1,0);
+					  str=str.substring(place+1); 
+				  }
 				  else //the cell is number
 				  {
 					  int num=Integer.parseInt(str.substring(0,place));
@@ -47,6 +51,11 @@ public class draft
 	 */
 	  public static void fillColors(int[]mat,int color,String cells )
 	  {
+		  for(int i=0;i<mat.length;i++)
+		  {
+			  if(mat[i]==0)
+				  mat[i]=1;
+		  }
 		  if(cells.length()>0)//if the string empty return
 		  {
 			  cells=cells.substring(1);//delete the char '_' from the string
@@ -66,24 +75,24 @@ public class draft
 				  }
 			  }
 		  }
+
 		  
 	  }
 //////////////////helpful functions for the algorithms/////////////////////
 	  /**
 	   * The function will write to a file  the output of the algorithm
 	   * @param path - path from the node start to the goal start
-	   * @param countVer - the depth of the node
-	   * @param cost - cost from the node start to the goal start
+	   * @param cost - the cost from the node start to the goal 
 	   * @param time - time for the algorithm to find the goal node
 	   */	  
-  public static void writeToFile(String path,int countVer,int cost,float time)
+  public static void writeToFile(String path,int cost,float time)
   {
 	  try 
 	  {  
 		FileWriter fw = new FileWriter("outPut.txt");
 		PrintWriter outs = new PrintWriter(fw);
 		outs.println(path);
-		outs.println(countVer);
+		outs.println(countVertices);
 		outs.println(cost);
 		if(printTimeRunning)
 			outs.println(time);
@@ -96,6 +105,20 @@ public class draft
       System.out.println("Error file is not writable\\n");
 	}
   }
+  /**
+   * The function will write to a file  the output of the algorithm
+   * @param path - path from the node start to the goal start
+   * @param cost - the cost from the node start to the goal 
+   * @param time - time for the algorithm to find the goal node
+   */	  
+public static void printToScreen(String path,int cost,float time)
+{
+	  System.out.println(path);
+	  System.out.println(countVertices);
+	  System.out.println(cost);
+	  if(printTimeRunning)
+		  System.out.println(time);
+}
   /**
    * The function will return if the node is the goal node
    * @param mat- matrix of the node 
@@ -192,7 +215,7 @@ public class draft
 	  {
 		  for(int j=0;j<mat[i].length;j++)
 		  {
-			  result=result+mat[i][j].getNum()+"$";
+			  result=result+mat[i][j].getNum()+",";
 		  }
 	  }
 	  return result;
@@ -201,7 +224,6 @@ public class draft
   /**
    * The function will run bfs algorithm to find the goal node
    * @param start-the node start
-   * @param printOpenList- if true print the open list and the results to the screen else write to a file
    */
   public static void bfs(vertex start)
   {
@@ -209,7 +231,6 @@ public class draft
 	  long startTime= System.currentTimeMillis();
 	  long totalTime= 0;
 	  queue.add(start);
-	  int count=1;//count number of vertices that created
 	  vertex goal=null;
 	  HashMap<String, vertex> verString= new HashMap<String, vertex>();
 	  while(!queue.isEmpty()&&goal==null)
@@ -218,97 +239,194 @@ public class draft
 		  verString.put(uniqeString(temp.mat), temp);
 		  move lastStep=temp.getLastStep();
 		  int row=temp.getRowEmpty();int col=temp.getColEmpty();
-		  if(lastStep!=move.Left&&col<temp.mat[0].length-1&&temp.mat[row][col+1].getColor()!=1) //step left
+		  if(lastStep!=move.Left&&col<temp.mat[0].length-1&&temp.mat[row][col+1].getColor()!=0) //step left
 		  {
-			  count++;
+			  countVertices++;
 			  cell [][]matLeft=createLeft(temp.mat,row,col);
 			  if(isAns(matLeft))
 			  {
 				  totalTime= (System.currentTimeMillis()-startTime);
-				  goal=new vertex(matLeft,temp.getCost()+1,move.Right,temp.getPath()+""+matLeft[row][col].getNum()+"L");
+				  goal=new vertex(matLeft,temp.getCost()+temp.mat[row][col+1].getColor(),move.Right,temp.getPath()+""+matLeft[row][col].getNum()+"L");
 			  }
 			  else
 			  {
-				  vertex right=new vertex(matLeft,temp.getCost()+1,move.Right,temp.getPath()+""+matLeft[row][col].getNum()+"L-");
-				  queue.add(right);
+				  vertex left=new vertex(matLeft,temp.getCost()+temp.mat[row][col+1].getColor(),move.Right,temp.getPath()+""+matLeft[row][col].getNum()+"L-");
+				  queue.add(left);
 			  }
 		  }
-		  if(lastStep!=move.Up&&row<temp.mat.length-1&&temp.mat[row+1][col].getColor()!=1&&goal==null) //step up
+		  if(lastStep!=move.Up&&row<temp.mat.length-1&&temp.mat[row+1][col].getColor()!=0&&goal==null) //step up
 		  {
-			  count++;
+			  countVertices++;
 			  cell [][]matUp=createUp(temp.mat,row,col);
 			  if(isAns(matUp))
 			  {
 				  totalTime= (System.currentTimeMillis()-startTime);
-				  goal=new vertex(matUp,temp.getCost()+1,move.Down,temp.getPath()+""+matUp[row][col].getNum()+"U");
+				  goal=new vertex(matUp,temp.getCost()+temp.mat[row+1][col].getColor(),move.Down,temp.getPath()+""+matUp[row][col].getNum()+"U");
 			  }
 			  else
 			  {
-				  vertex down=new vertex(matUp,temp.getCost()+1,move.Down,temp.getPath()+""+matUp[row][col].getNum()+"U-");
-				  queue.add(down);  
+				  vertex up=new vertex(matUp,temp.getCost()+temp.mat[row+1][col].getColor(),move.Down,temp.getPath()+""+matUp[row][col].getNum()+"U-");
+				  queue.add(up);  
 			  }
 		  }
-		  if(lastStep!=move.Right&&col>0&&temp.mat[row][col-1].getColor()!=1&&goal==null) //step right
+		  if(lastStep!=move.Right&&col>0&&temp.mat[row][col-1].getColor()!=0&&goal==null) //step right
 		  {
-			  count++;
+			  countVertices++;
 			  cell [][]matRight=createRight(temp.mat,row,col);
 			  if(isAns(matRight))
 			  {
 				  totalTime= (System.currentTimeMillis()-startTime);
-				  goal=new vertex(matRight,temp.getCost()+1,move.Left,temp.getPath()+""+matRight[row][col].getNum()+"R");
+				  goal=new vertex(matRight,temp.getCost()+temp.mat[row][col-1].getColor(),move.Left,temp.getPath()+""+matRight[row][col].getNum()+"R");
 
 			  }
-			  vertex left=new vertex(matRight,temp.getCost()+1,move.Left,temp.getPath()+""+matRight[row][col].getNum()+"R-");
-			  queue.add(left);
+			  vertex right=new vertex(matRight,temp.getCost()+temp.mat[row][col-1].getColor(),move.Left,temp.getPath()+""+matRight[row][col].getNum()+"R-");
+			  queue.add(right);
 		  }
-		  if(lastStep!=move.Down&&row>0&&temp.mat[row-1][col].getColor()!=1&&goal==null) //step up
+		  if(lastStep!=move.Down&&row>0&&temp.mat[row-1][col].getColor()!=0&&goal==null) //step up
 		  {
-			  count++;
+			  countVertices++;
 			  cell [][]matDown=createDown(temp.mat,row,col);
 			  if(isAns(matDown))
 			  {
 				  totalTime= (System.currentTimeMillis()-startTime);
-				  goal=new vertex(matDown,temp.getCost()+1,move.Up,temp.getPath()+""+matDown[row][col].getNum()+"D"); 
+				  goal=new vertex(matDown,temp.getCost()+temp.mat[row-1][col].getColor(),move.Up,temp.getPath()+""+matDown[row][col].getNum()+"D"); 
 			  }
 			  else
 			  {
-				  vertex up=new vertex(matDown,temp.getCost()+1,move.Up,temp.getPath()+""+matDown[row][col].getNum()+"D-"); 
-				  queue.add(up); 
+				  vertex down=new vertex(matDown,temp.getCost()+temp.mat[row-1][col].getColor(),move.Up,temp.getPath()+""+matDown[row][col].getNum()+"D-"); 
+				  queue.add(down); 
 			  }
 		  }
 	  }
 	  if(!printOpenList) 
-	  {
-		  writeToFile(goal.getPath(),count,goal.getCost(),totalTime/1000F);
-	  }
+		  writeToFile(goal.getPath(),goal.getCost(),totalTime/1000F);
 	  else
-	  {
-		  System.out.println(goal.getPath());
-		  System.out.println(count);
-		  System.out.println(goal.getCost());
-		  if(printTimeRunning)
-			  System.out.println(totalTime/1000F);
-	  }
+		  printToScreen(goal.getPath(),goal.getCost(),totalTime/1000F);
   }
-  
   /**
    * The function will run bfs algorithm to find the goal node
    * @param start-the node start
    * @param printOpenList- if true print the open list and the results to the screen else write to a file
    */
-  public static void dfs(vertex start,int depth) 
+  public static void dfid(vertex start) 
   {
-	  Deque<vertex> stack = new ArrayDeque<vertex>();
+	  boolean find=false;
+	  vertex result=null;
 	  long startTime= System.currentTimeMillis();
-	  long totalTime= 0;
-	  stack.add(start);
-	  int count=1;//count number of vertices that created
-	  vertex goal=null;
-	  HashMap<String, vertex> verString= new HashMap<String, vertex>();
-	  while(!stack.isEmpty()&&goal==null)
+	  for(int i=1;i<1000&&!find;i++)
 	  {
-		  
+		  countVertices=1;
+		  HashMap<String, vertex> verString= new HashMap<String, vertex>();
+		  result=dfs(start,i,verString);
+		  if(result!=null) 
+			  find=true;
 	  }
+	  long totalTime= System.currentTimeMillis()-startTime;
+	  if(result!=null&&result.getCost()>=0)
+	  {
+		  if(!printOpenList) 
+			  writeToFile(result.getPath().substring(0,result.getPath().length()-1),result.getCost(),totalTime/1000F);
+		  else
+		  {
+			  printToScreen(result.getPath().substring(0,result.getPath().length()-1),result.getCost(),totalTime/1000F);
+		  }
+	  }
+	  else
+		  System.out.println("not found");
+
+  }
+  /**
+   * The function will run dfid algorithm to find the goal node
+   * @param start-the node start
+   *@ return null if the algo stop because of the depth,vertex if found the goal, and vertex with cost negative if finish all the tree and not found the goal
+   */
+  public static vertex dfs(vertex current,int depth,HashMap<String, vertex> h) 
+  {
+	  if(isAns(current.mat))
+		  return current;
+	  if(depth==0)
+		  return null;
+	  h.put(uniqeString(current.mat),current);
+	  boolean isCutOff=false;
+	  move lastStep=current.getLastStep();
+	  int row=current.getRowEmpty();int col=current.getColEmpty();
+	  //for each legal operator of start
+	  if(lastStep!=move.Left&&col<current.mat[0].length-1&&current.mat[row][col+1].getColor()!=0) //step left
+	  {
+		  cell [][]matLeft=createLeft(current.mat,row,col);
+		  if(!h.containsKey(uniqeString(matLeft)))
+		  {
+			  vertex left=new vertex(matLeft,current.getCost()+current.mat[row][col+1].getColor(),move.Right,current.getPath()+""+matLeft[row][col].getNum()+"L-");
+			  countVertices++;
+			  vertex result=dfs(left,depth-1,h);
+			  if(result==null)
+				  isCutOff=true;
+			  else
+				  if(result.getCost()>=0)
+					  return result;
+		  }
+	  }
+	  if(lastStep!=move.Up&&row<current.mat.length-1&&current.mat[row+1][col].getColor()!=0) //step up
+	  {
+		  cell [][]matUp=createUp(current.mat,row,col);
+		  if(!h.containsKey(uniqeString(matUp)))
+		  {
+			  vertex up=new vertex(matUp,current.getCost()+current.mat[row+1][col].getColor(),move.Down,current.getPath()+""+matUp[row][col].getNum()+"U-");
+			  countVertices++;
+			  vertex result=dfs(up,depth-1,h);
+			  if(result==null)
+				  isCutOff=true;
+			  else
+				  if(result.getCost()>=0)
+					  return result;
+		  }
+	  }
+	  if(lastStep!=move.Right&&col>0&&current.mat[row][col-1].getColor()!=0) //step right
+	  {
+		  cell [][]matRight=createRight(current.mat,row,col);
+		  if(!h.containsKey(uniqeString(matRight)))
+		  {
+			  vertex right=new vertex(matRight,current.getCost()+current.mat[row][col-1].getColor(),move.Left,current.getPath()+""+matRight[row][col].getNum()+"R-");
+			  countVertices++;
+			  vertex result=dfs(right,depth-1,h);
+			  if(result==null)
+				  isCutOff=true;
+			  else
+				  if(result.getCost()>=0)
+					  return result;
+		  }
+	  }
+	  if(lastStep!=move.Down&&row>0&&current.mat[row-1][col].getColor()!=0) //step down
+	  {
+		  cell [][]matDown=createDown(current.mat,row,col);
+		  if(!h.containsKey(uniqeString(matDown)))
+		  {
+			  vertex down=new vertex(matDown,current.getCost()+current.mat[row-1][col].getColor(),move.Up,current.getPath()+""+matDown[row][col].getNum()+"D-");
+			  countVertices++;
+			  vertex result=dfs(down,depth-1,h);
+			  if(result==null)
+				  isCutOff=true;
+			  else
+				  if(result.getCost()>=0)
+					  return result;
+		  }
+	  }
+	  h.remove(uniqeString(current.mat));
+	  if(isCutOff)
+		  return null;
+	  return new vertex(current.mat,-1,current.getLastStep(),current.getPath());
+  }
+  public static void printme(cell[][]mat) 
+  {
+	  for(int i=0;i<mat.length;i++) 
+	  {
+		  for(int j=0;j<mat[i].length;j++)
+		  {
+			  System.out.print(mat[i][j].getNum()+",");
+		  }
+		  System.out.println();
+	  }
+	  System.out.println();
   }
   public static void main(String[] args)throws Exception 
   { 
@@ -330,17 +448,15 @@ public class draft
 				throw new RuntimeException("Wrong input for third line");
 	  String sizeMatrix=br.readLine();//four line will tell us the format of the matrix
 	  int placeX=sizeMatrix.indexOf("x");
-	  System.out.println(placeX);
 	  int row=Integer.parseInt(sizeMatrix.substring(0,placeX));
 	  int col=Integer.parseInt(sizeMatrix.substring(placeX+1,sizeMatrix.length()));
 	  int colorsCells[]=new int[row*col];
 	  String blackList=br.readLine();//five line will tell us the format of the matrix
-	  fillColors(colorsCells,1,blackList.substring(6));//fill the color 1 for black in the matrix
+	  fillColors(colorsCells,0,blackList.substring(6));//fill the color 1 for black in the matrix
 	  String redList=br.readLine();//five line will tell us the format of the matrix
-	  fillColors(colorsCells,2,redList.substring(4));//fill the color 2 for red in the matrix
+	  fillColors(colorsCells,30,redList.substring(4));//fill the color 2 for red in the matrix
 	  cell numberCells[][]=new cell[row][col];
 	  fillNumber(numberCells,colorsCells,br);
-	  System.out.println(isAns(numberCells));
 	  switch(algo)
 		{//case for algorithm
 			case "BFS":
@@ -351,7 +467,8 @@ public class draft
 			}
 			case "DFID":
 			{
-				System.out.println("DFID");
+				vertex start=new vertex(numberCells,0,move.None,"");	
+				dfid(start);
 				break;
 			}
 			case "A*":
@@ -377,80 +494,3 @@ public class draft
   } 
 } 
 
-
-
-
-
-//public  String solve(Node root, boolean toTime, boolean openList)
-//{
-//	int [] lev=new int[5];
-//	Node goal=null;
-//	long start= System.currentTimeMillis();
-//	int i=0;
-//	AbstractQueue<Node> Q = new LinkedBlockingQueue<Node>(); 
-//	Q.add(root);
-//	lev[0]++;
-//	HashMap<Integer, Node> hm= new HashMap<Integer, Node>();
-//	while(!Q.isEmpty()) 
-//	{
-//		Node current=Q.poll();
-//		if(current.getDepth()>10)
-//			break;
-//		hm.put(i++, current);
-//		Node l=current.exploreLeft();
-//		if(l!=null ) {
-//			if( l.isGoal()) {  
-//				goal=l;
-//				break;
-//			}
-//			Q.add(l);
-//		}
-//		Node u=current.exploreUp();
-//		if(u!=null ) {
-//			if(u.isGoal()) {  
-//				goal=u;
-//				break;
-//			}
-//			Q.add(u);
-//		}
-//		Node r=current.exploreRight();
-//		if(r!=null ) {
-//			if(r.isGoal()) {  
-//				goal=r;
-//				break;
-//			}
-//			Q.add(r);
-//		}
-//		Node d=current.exploreDown();
-//		if(d!=null ) {
-//			if(d.isGoal()) {  
-//				goal=d;
-//				break;
-//			}
-//			Q.add(d);
-//		}
-//		if(l!=null) {
-//			lev[l.getDepth()]++;
-//		}
-//		if(u!=null) {
-//			lev[u.getDepth()]++;
-//		}
-//		if(r!=null) {
-//			lev[r.getDepth()]++;	
-//		}
-//		if(d!=null) {
-//			lev[d.getDepth()]++;
-//		}
-//	}
-////	for (int j = 0; j < lev.length; j++) {
-////		System.out.println(j+"  ="+lev[j]);
-////	}
-//	long end=System.currentTimeMillis();
-//	time=end-start;
-//	System.out.println("time= "+time/1000.0+" in seconds");
-//	if(goal!=null) {
-//		return goal.path().substring(0, goal.path().length()-1)+"\n num:"+(Q.size()+hm.size())+"\n cost: "+goal.getCost();
-//	}
-//	saveToFile(toTime, openList, goal, (Q.size()+hm.size()));
-//	return "no path";
-//}
