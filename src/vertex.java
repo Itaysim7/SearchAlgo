@@ -15,8 +15,10 @@ public class vertex
 	private int costH=0;
 	private move lastStep;
 	private String path;
+	private boolean out;
 	public vertex(cell [][]temp,int cost,move last,String path)
 	{
+		out=false;
 		lastStep=last;
 		mat=new cell[temp.length][temp[0].length];
 		this.cost=cost;
@@ -36,6 +38,7 @@ public class vertex
 	}
 	public vertex(cell [][]temp,int cost,int costh,move last,String path)
 	{
+		out=false;
 		costH=costh;
 		lastStep=last;
 		mat=new cell[temp.length][temp[0].length];
@@ -77,5 +80,17 @@ public class vertex
 	public String getPath() 
 	{
 		return this.path;
+	}
+	public void setPath(String s) 
+	{
+		this.path=s;
+	}
+	public boolean getOut() 
+	{
+		return this.out;
+	}
+	public void setOut(boolean t) 
+	{
+		this.out=t;
 	}
 }

@@ -1,9 +1,9 @@
 import java.io.*;
-
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Stack;
 
 public class draft 
 {
@@ -208,6 +208,40 @@ public class draft
 	  }
 	  return count;
   }
+  /**
+   * The function will return the solution path for ida* algorithm
+   * @param s- Stack type of vertex 
+   * @return String 
+   */
+  public static String reversePath(Stack<vertex> s) 
+  {
+	  String path="";
+	  vertex pre=s.pop();
+	  while(!s.empty())
+	  {
+		  vertex next=s.pop();
+		  if(pre.getRowEmpty()<next.getRowEmpty())
+		  {
+			  path=pre.mat[next.getRowEmpty()][next.getColEmpty()].getNum()+"D"+"-"+path;
+		  }
+		  if(pre.getRowEmpty()>next.getRowEmpty())
+		  {
+			  path=pre.mat[next.getRowEmpty()][next.getColEmpty()].getNum()+"U"+"-"+path;
+		  }
+		  if(pre.getColEmpty()<next.getColEmpty())
+		  {
+			  path=pre.mat[next.getRowEmpty()][next.getColEmpty()].getNum()+"R"+"-"+path;
+
+		  }
+		  if(pre.getColEmpty()>next.getColEmpty())
+		  {
+			  path=pre.mat[next.getRowEmpty()][next.getColEmpty()].getNum()+"L"+"-"+path;
+		  }
+		  pre=next;
+	  }	  
+	  return path;
+  }
+  
   /**
    * The function will copy the matrix
    * @param mat- matrix of the node 
@@ -570,14 +604,206 @@ public class draft
 	  }
 	  return null;
   }
+  public static vertex IDA(vertex start) 
+  { 
+	  vertex result=null;
+	  Stack<vertex> stack=new Stack<vertex>();
+	  HashMap<String, vertex> hMap= new HashMap<String, vertex>();
+	  int trash=start.getCostH();
+	  while(trash<10000)
+	  {
+		  countVertices=1;
+		  start.setOut(false);
+		  int minf=Integer.MAX_VALUE;
+		  stack.push(start);
+		  hMap.put(uniqeString(start.mat), start);
+		  while(!stack.empty())
+		  {
+			  vertex front=stack.pop();
+			  if(front.getOut())
+				  hMap.remove(uniqeString(front.mat));
+			  else
+			  {
+				  front.setOut(true);
+				  stack.push(front); //to save the path of the solution
+				  move lastStep=front.getLastStep();
+				  int row=front.getRowEmpty();int col=front.getColEmpty();
+				  //check each operator
+				  if(lastStep!=move.Left&&col<front.mat[0].length-1&&front.mat[row][col+1].getColor()!=0) 
+				  {
+					  countVertices++;
+					  boolean continueToNextOp=false;
+					  cell [][]matLeft=createLeft(front.mat,row,col);
+					  vertex left=new vertex(matLeft,front.getCost()+front.mat[row][col+1].getColor(),front.getCost()+front.mat[row][col+1].getColor()+heuristicFunction(matLeft),move.Right,"");
+					  if(left.getCostH()>trash) //cut this branch
+					  {
+						  if(minf>left.getCostH())
+							  minf=left.getCostH();
+						  continueToNextOp=true;
+					  }
+					  if(!continueToNextOp&&hMap.containsKey(uniqeString(matLeft))) //loop avoidance
+					  {
+						  vertex contain=hMap.get(uniqeString(matLeft));
+						  if(!contain.getOut())
+						  {
+							  if(contain.getCostH()>left.getCostH())// if this is better f(g)
+							  {
+								  hMap.remove(uniqeString(matLeft));
+								  stack.remove(contain);
+							  }
+							  else
+								  continueToNextOp=true;
+						  }
+						  else
+							  continueToNextOp=true;
+					  }
+					  if(!continueToNextOp&&isAns(matLeft)) //if this is the goal
+					  {
+						  String path=reversePath(stack);
+						  left.setPath(path+matLeft[row][col].getNum()+"L-");
+						  return left;
+					  }
+					  if(!continueToNextOp) //if this is the goal
+					  {
+						  stack.push(left);
+						  hMap.put(uniqeString(left.mat), left);
+					  }
+				  }
+				  //operator up
+				  if(lastStep!=move.Up&&row<front.mat.length-1&&front.mat[row+1][col].getColor()!=0) 
+				  {
+					  countVertices++;
+					  boolean continueToNextOp=false;
+					  cell [][]matUp=createUp(front.mat,row,col);
+					  vertex up=new vertex(matUp,front.getCost()+front.mat[row+1][col].getColor(),front.getCost()+front.mat[row+1][col].getColor()+heuristicFunction(matUp),move.Down,"");
+					  if(up.getCostH()>trash) //cut this branch
+					  {
+						  if(minf>up.getCostH())
+							  minf=up.getCostH();
+						  continueToNextOp=true;
+					  }
+					  if(!continueToNextOp&&hMap.containsKey(uniqeString(matUp))) //loop avoidance
+					  {
+						  vertex contain=hMap.get(uniqeString(matUp));
+						  if(!contain.getOut())
+						  {
+							  if(contain.getCostH()>up.getCostH())// if this is better f(g)
+							  {
+								  hMap.remove(uniqeString(matUp));
+								  stack.remove(contain);
+							  }
+							  else
+								  continueToNextOp=true;
+						  }
+						  else
+							  continueToNextOp=true;
+					  }
+					  if(!continueToNextOp&&isAns(matUp)) //if this is the goal
+					  {
+						  String path=reversePath(stack);
+						  up.setPath(path+matUp[row][col].getNum()+"U-");
+						  return up;
+					  }
+					  if(!continueToNextOp) //if this is the goal
+					  {
+						  stack.push(up);
+						  hMap.put(uniqeString(up.mat), up);
+					  }
+				  }
+				  if(lastStep!=move.Right&&col>0&&front.mat[row][col-1].getColor()!=0) //step right
+				  {
+					  countVertices++;
+					  boolean continueToNextOp=false;
+					  cell [][]matRight=createRight(front.mat,row,col);
+					  vertex right=new vertex(matRight,front.getCost()+front.mat[row][col-1].getColor(),front.getCost()+front.mat[row][col-1].getColor()+heuristicFunction(matRight),move.Left,"");
+					  if(right.getCostH()>trash) //cut this branch
+					  {
+						  if(minf>right.getCostH())
+							  minf=right.getCostH();
+						  continueToNextOp=true;
+					  }
+					  if(!continueToNextOp&&hMap.containsKey(uniqeString(matRight))) //loop avoidance
+					  {
+						  vertex contain=hMap.get(uniqeString(matRight));
+						  if(!contain.getOut())
+						  {
+							  if(contain.getCostH()>right.getCostH())// if this is better f(g)
+							  {
+								  hMap.remove(uniqeString(matRight));
+								  stack.remove(contain);
+							  }
+							  else
+								  continueToNextOp=true;
+						  }
+						  else
+							  continueToNextOp=true;
+					  }
+					  if(!continueToNextOp&&isAns(matRight)) //if this is the goal
+					  {
+						  String path=reversePath(stack);
+						  right.setPath(path+matRight[row][col].getNum()+"R-");
+						  return right;
+					  }
+					  if(!continueToNextOp) //if this is the goal
+					  {
+						  stack.push(right);
+						  hMap.put(uniqeString(right.mat), right);
+					  }
+				  }
+				  if(lastStep!=move.Down&&row>0&&front.mat[row-1][col].getColor()!=0) //step down
+				  {
+					  countVertices++;
+					  boolean continueToNextOp=false;
+					  cell [][]matDown=createDown(front.mat,row,col);
+					  vertex down=new vertex(matDown,front.getCost()+front.mat[row-1][col].getColor(),front.getCost()+front.mat[row-1][col].getColor()+heuristicFunction(matDown),move.Up,"");
+					  if(down.getCostH()>trash) //cut this branch
+					  {
+						  if(minf>down.getCostH())
+							  minf=down.getCostH();
+						  continueToNextOp=true;
+					  }
+					  if(!continueToNextOp&&hMap.containsKey(uniqeString(matDown))) //loop avoidance
+					  {
+						  vertex contain=hMap.get(uniqeString(matDown));
+						  if(!contain.getOut())
+						  {
+							  if(contain.getCostH()>down.getCostH())// if this is better f(g)
+							  {
+								  hMap.remove(uniqeString(matDown));
+								  stack.remove(contain);
+							  }
+							  else
+								  continueToNextOp=true;
+						  }
+						  else
+							  continueToNextOp=true;
+					  }
+					  if(!continueToNextOp&&isAns(matDown)) //if this is the goal
+					  {
+						  String path=reversePath(stack);
+						  down.setPath(path+matDown[row][col].getNum()+"D-");
+						  return down;
+					  }
+					  if(!continueToNextOp) //if this is the goal
+					  {
+						  stack.push(down);
+						  hMap.put(uniqeString(down.mat), down);
+					  }
+				  }
+			  }
+		  }
+		  trash=minf;
+	  }
+	  return result;
+  }
   public static void main(String[] args)throws Exception 
   { 
 	  cell [][] numberCells=readFromFile();
+	  vertex start=new vertex(numberCells,0,move.None,"");
 	  switch(algo)
 		{//case for algorithm
 			case "BFS":
 			{
-				vertex start=new vertex(numberCells,0,move.None,"");
 				long startTime= System.currentTimeMillis();
 				vertex result=bfs(start);
 				long totalTime= System.currentTimeMillis()-startTime;
@@ -599,7 +825,6 @@ public class draft
 			}
 			case "DFID":
 			{
-				vertex start=new vertex(numberCells,0,move.None,"");	
 				long startTime= System.currentTimeMillis();
 				vertex result=dfid(start);
 				long totalTime= System.currentTimeMillis()-startTime;
@@ -621,7 +846,6 @@ public class draft
 			}
 			case "A*":
 			{
-				vertex start=new vertex(numberCells,0,move.None,"");
 				long startTime= System.currentTimeMillis();
 				vertex result=AStar(start);
 				long totalTime= System.currentTimeMillis()-startTime;
@@ -643,7 +867,23 @@ public class draft
 			}
 			case "IDA*":
 			{
-				System.out.println("IDA*");
+				long startTime= System.currentTimeMillis();
+				vertex result=IDA(start);
+				long totalTime= System.currentTimeMillis()-startTime;
+				if(result!=null)
+				{
+					if(!printOpenList) 
+						writeToFile(result.getPath().substring(0,result.getPath().length()-1),result.getCost(),totalTime/1000F);
+					else
+						printToScreen(result.getPath().substring(0,result.getPath().length()-1),result.getCost(),totalTime/1000F);
+				}
+				else
+				{
+					if(!printOpenList) 
+						writeToFile("",-1,totalTime/1000F);
+					else
+						printToScreen("",-1,totalTime/1000F);;
+				}
 				break;
 			}
 			case "DFBnB":
