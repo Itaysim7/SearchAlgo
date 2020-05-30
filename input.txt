@@ -1,9 +1,9 @@
-DFID
+BFS
 with time
-with open
-3x3
+no open
+3x4
 Black:
-Red:
-1,7,2
-5,_,3
-4,8,6
+Red: 11
+1,2,3,4
+5,6,11,7
+9,10,8,_

@@ -12,10 +12,31 @@ public class vertex
 	private int rowEmpty=0;
 	private int colEmpty=0;
 	private int cost;
+	private int costH=0;
 	private move lastStep;
 	private String path;
 	public vertex(cell [][]temp,int cost,move last,String path)
 	{
+		lastStep=last;
+		mat=new cell[temp.length][temp[0].length];
+		this.cost=cost;
+		for(int i=0;i<temp.length;i++) //copy the matrix
+		{
+			for(int j=0;j<temp[i].length;j++)
+			{
+				if(temp[i][j].getColor()==-1)//the place of the empty cell
+				{
+					this.rowEmpty=i;
+					this.colEmpty=j;
+				}
+				mat[i][j]=temp[i][j];
+			}
+		}
+		this.path=path;
+	}
+	public vertex(cell [][]temp,int cost,int costh,move last,String path)
+	{
+		costH=costh;
 		lastStep=last;
 		mat=new cell[temp.length][temp[0].length];
 		this.cost=cost;
@@ -44,6 +65,10 @@ public class vertex
 	public int getCost() 
 	{
 		return this.cost;
+	}
+	public int getCostH() 
+	{
+		return this.costH;
 	}
 	public move getLastStep() 
 	{
