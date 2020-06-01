@@ -1,3 +1,5 @@
+import java.util.Stack;
+
 /**
  * This class represents a node in a graph,every vertex has mat, rowEmpty, colEmpty, cost, lastStep, path
  * mat is matrix type of cell,rowEmpty and V represent the place of the empty cell in the matrix.
@@ -8,9 +10,7 @@
  */
 public class vertex 
 {
-	public cell[][] mat;
-	private int rowEmpty=0;
-	private int colEmpty=0;
+	public Board b;
 	private int cost;
 	private int costH=0;
 	private move lastStep;
@@ -18,52 +18,28 @@ public class vertex
 	private boolean out;
 	public vertex(cell [][]temp,int cost,move last,String path)
 	{
+		b=new Board(temp);
 		out=false;
 		lastStep=last;
-		mat=new cell[temp.length][temp[0].length];
 		this.cost=cost;
-		for(int i=0;i<temp.length;i++) //copy the matrix
-		{
-			for(int j=0;j<temp[i].length;j++)
-			{
-				if(temp[i][j].getColor()==-1)//the place of the empty cell
-				{
-					this.rowEmpty=i;
-					this.colEmpty=j;
-				}
-				mat[i][j]=temp[i][j];
-			}
-		}
 		this.path=path;
 	}
-	public vertex(cell [][]temp,int cost,int costh,move last,String path)
+	public vertex(Board b1,int cost,move last,String path)
 	{
+		b=b1.copy();
+		out=false;
+		lastStep=last;
+		this.cost=cost;
+		this.path=path;
+	}
+	public vertex(Board b1,int cost,int costh,move last,String path)
+	{
+		b=b1.copy();
 		out=false;
 		costH=costh;
 		lastStep=last;
-		mat=new cell[temp.length][temp[0].length];
 		this.cost=cost;
-		for(int i=0;i<temp.length;i++) //copy the matrix
-		{
-			for(int j=0;j<temp[i].length;j++)
-			{
-				if(temp[i][j].getColor()==-1)//the place of the empty cell
-				{
-					this.rowEmpty=i;
-					this.colEmpty=j;
-				}
-				mat[i][j]=temp[i][j];
-			}
-		}
 		this.path=path;
-	}
-	public int getRowEmpty() 
-	{
-		return this.rowEmpty;
-	}
-	public int getColEmpty() 
-	{
-		return this.colEmpty;
 	}
 	public int getCost() 
 	{
@@ -93,4 +69,27 @@ public class vertex
 	{
 		this.out=t;
 	}
+	public vertex copy()
+	{
+		vertex copy=new vertex(b,cost,costH,lastStep,path);
+		copy.setOut(this.out);
+		return copy;	
+	}
+	  /**
+	   * The function will return the last step represent by One char
+	   * @return String 
+	   */
+	  public String lastStep() 
+	  {
+		  if(lastStep==move.Right)
+			  return "L-";
+		  if(lastStep==move.Down)
+			  return "U-";
+		  if(lastStep==move.Left)
+			  return "R-";
+		  if(lastStep==move.Up)
+			  return "D-";
+		  return "";
+	  }
+
 }
