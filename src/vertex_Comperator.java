@@ -8,6 +8,9 @@ public class vertex_Comperator implements Comparator<vertex>
 	public int compare(vertex o1, vertex o2) 
 	{
 		int dp = o1.getCostH() - o2.getCostH();
-		return dp;
+		if(dp!=0)
+			return dp;
+		else
+			return (int)(o1.getTime() - o2.getTime());
 	}
 }

@@ -12,10 +12,11 @@ public class vertex
 {
 	public Board b;
 	private int cost;
-	private int costH=0;
+	private int costH;
 	private move lastStep;
 	private String path;
 	private boolean out;
+	private long timestamp;
 	public vertex(cell [][]temp,int cost,move last,String path)
 	{
 		b=new Board(temp);
@@ -23,6 +24,8 @@ public class vertex
 		lastStep=last;
 		this.cost=cost;
 		this.path=path;
+		costH=b.heuristicFunction();
+		timestamp=System.currentTimeMillis();
 	}
 	public vertex(Board b1,int cost,move last,String path)
 	{
@@ -31,6 +34,8 @@ public class vertex
 		lastStep=last;
 		this.cost=cost;
 		this.path=path;
+		costH=b.heuristicFunction();
+		timestamp=System.currentTimeMillis();
 	}
 	public vertex(Board b1,int cost,int costh,move last,String path)
 	{
@@ -40,6 +45,7 @@ public class vertex
 		lastStep=last;
 		this.cost=cost;
 		this.path=path;
+		timestamp=System.currentTimeMillis();
 	}
 	public int getCost() 
 	{
@@ -69,9 +75,18 @@ public class vertex
 	{
 		this.out=t;
 	}
+	public long getTime() 
+	{
+		return this.timestamp;
+	}
+	public void setTime(long t) 
+	{
+		this.timestamp=t;
+	}
 	public vertex copy()
 	{
 		vertex copy=new vertex(b,cost,costH,lastStep,path);
+		copy.setTime(this.timestamp);
 		copy.setOut(this.out);
 		return copy;	
 	}

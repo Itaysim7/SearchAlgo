@@ -199,6 +199,28 @@ public class draft
 		  return path;
 	  }
 
+		/**
+		 * The function will write or print to the screen the result of the algorithm
+		 * @param result- vertex of the answer
+		 * @return totalTime- the time that the algorithm solve the problem 
+		 */
+		public static void printResult(vertex result,long totalTime) 
+		{
+			if(result!=null)
+			{
+				if(!printOpenList) 
+					writeToFile(result.getPath().substring(0,result.getPath().length()-1),result.getCost(),totalTime/1000F);
+				else
+					printToScreen(result.getPath().substring(0,result.getPath().length()-1),result.getCost(),totalTime/1000F);
+			}
+			else
+			{
+				if(!printOpenList) 
+					writeToFile("",-1,totalTime/1000F);
+				else
+					printToScreen("",-1,totalTime/1000F);;
+			}
+		}
 
   ///////////////////algorithms////////////////////////////
   /**
@@ -209,69 +231,68 @@ public class draft
   {
 	  Queue<vertex> queue = new LinkedList<>();
 	  queue.add(start);
-	  vertex goal=null;
-	  HashMap<String, vertex> verString= new HashMap<String, vertex>();
-	  while(!queue.isEmpty()&&goal==null)
+	  HashMap<String, vertex> openList= new HashMap<String, vertex>();
+	  HashMap<String, vertex> closeList= new HashMap<String, vertex>();
+	  while(!queue.isEmpty())
 	  {
 		  vertex temp=queue.remove();
-		  verString.put(temp.b.uniqeString(), temp);
+		  closeList.put(temp.b.uniqeString(), temp);
 		  move lastStep=temp.getLastStep();
 		  int row=temp.b.getRow();int col=temp.b.getCol();
 		  if(lastStep!=move.Left&&col<temp.b.mat[0].length-1&&temp.b.mat[row][col+1].getColor()!=0) //step left
 		  {
 			  countVertices++;
 			  Board matLeft=temp.b.createLeft();
-			  if(matLeft.isAns())
+			  vertex left=new vertex(matLeft,temp.getCost()+temp.b.mat[row][col+1].getColor(),move.Right,temp.getPath()+""+matLeft.mat[row][col].getNum()+"L-");
+			  if(!closeList.containsKey(matLeft.uniqeString())&&!openList.containsKey(matLeft.uniqeString()))
 			  {
-				  goal=new vertex(matLeft,temp.getCost()+temp.b.mat[row][col+1].getColor(),move.Right,temp.getPath()+""+matLeft.mat[row][col].getNum()+"L");
-			  }
-			  else
-			  {
-				  vertex left=new vertex(matLeft,temp.getCost()+temp.b.mat[row][col+1].getColor(),move.Right,temp.getPath()+""+matLeft.mat[row][col].getNum()+"L-");
+				  if(matLeft.isAns())
+					  return left;
+				  openList.put(matLeft.uniqeString(), left);
 				  queue.add(left);
 			  }
 		  }
-		  if(lastStep!=move.Up&&row<temp.b.mat.length-1&&temp.b.mat[row+1][col].getColor()!=0&&goal==null) //step up
+		  if(lastStep!=move.Up&&row<temp.b.mat.length-1&&temp.b.mat[row+1][col].getColor()!=0) //step up
 		  {
 			  countVertices++;
 			  Board matUp=temp.b.createUp();
-			  if(matUp.isAns())
+			  vertex up=new vertex(matUp,temp.getCost()+temp.b.mat[row+1][col].getColor(),move.Down,temp.getPath()+""+matUp.mat[row][col].getNum()+"U-");
+			  if(!closeList.containsKey(matUp.uniqeString())&&!openList.containsKey(matUp.uniqeString()))
 			  {
-				  goal=new vertex(matUp,temp.getCost()+temp.b.mat[row+1][col].getColor(),move.Down,temp.getPath()+""+matUp.mat[row][col].getNum()+"U");
-			  }
-			  else
-			  {
-				  vertex up=new vertex(matUp,temp.getCost()+temp.b.mat[row+1][col].getColor(),move.Down,temp.getPath()+""+matUp.mat[row][col].getNum()+"U-");
-				  queue.add(up);  
+				  if(matUp.isAns())
+					  return up;
+				  openList.put(matUp.uniqeString(), up);
+				  queue.add(up);
 			  }
 		  }
-		  if(lastStep!=move.Right&&col>0&&temp.b.mat[row][col-1].getColor()!=0&&goal==null) //step right
+		  if(lastStep!=move.Right&&col>0&&temp.b.mat[row][col-1].getColor()!=0) //step right
 		  {
 			  countVertices++;
 			  Board matRight=temp.b.createRight();
-			  if(matRight.isAns())
-			  {
-				  goal=new vertex(matRight,temp.getCost()+temp.b.mat[row][col-1].getColor(),move.Left,temp.getPath()+""+matRight.mat[row][col].getNum()+"R");
-			  }
 			  vertex right=new vertex(matRight,temp.getCost()+temp.b.mat[row][col-1].getColor(),move.Left,temp.getPath()+""+matRight.mat[row][col].getNum()+"R-");
-			  queue.add(right);
+			  if(!closeList.containsKey(matRight.uniqeString())&&!openList.containsKey(matRight.uniqeString()))
+			  {
+				  if(matRight.isAns())
+					  return right;
+				  openList.put(matRight.uniqeString(), right);
+				  queue.add(right);
+			  }
 		  }
-		  if(lastStep!=move.Down&&row>0&&temp.b.mat[row-1][col].getColor()!=0&&goal==null) //step up
+		  if(lastStep!=move.Down&&row>0&&temp.b.mat[row-1][col].getColor()!=0) //step up
 		  {
 			  countVertices++;
 			  Board matDown=temp.b.createDown();
-			  if(matDown.isAns())
+			  vertex down=new vertex(matDown,temp.getCost()+temp.b.mat[row-1][col].getColor(),move.Up,temp.getPath()+""+matDown.mat[row][col].getNum()+"D-"); 
+			  if(!closeList.containsKey(matDown.uniqeString())&&!openList.containsKey(matDown.uniqeString()))
 			  {
-				  goal=new vertex(matDown,temp.getCost()+temp.b.mat[row-1][col].getColor(),move.Up,temp.getPath()+""+matDown.mat[row][col].getNum()+"D"); 
-			  }
-			  else
-			  {
-				  vertex down=new vertex(matDown,temp.getCost()+temp.b.mat[row-1][col].getColor(),move.Up,temp.getPath()+""+matDown.mat[row][col].getNum()+"D-"); 
-				  queue.add(down); 
+				  if(matDown.isAns())
+					  return down;
+				  openList.put(matDown.uniqeString(), down);
+				  queue.add(down);
 			  }
 		  }
 	  }
-	  return goal;
+	  return null;
   }
   /**
    * The function will run dfid algorithm to find the goal node
@@ -386,9 +407,9 @@ public class draft
   public static vertex AStar(vertex start) 
   { 
 	  PriorityQueue<vertex> pq=new PriorityQueue <vertex>(new vertex_Comperator());
+	  pq.add(start);
 	  HashMap<String, vertex> openList= new HashMap<String, vertex>();
 	  HashMap<String, vertex> closeList= new HashMap<String, vertex>();
-	  pq.add(start);
 	  while(!pq.isEmpty())
 	  {
 		  vertex current=pq.poll();
@@ -398,88 +419,46 @@ public class draft
 		  closeList.put(current.b.uniqeString(), current);
 		  move lastStep=current.getLastStep();
 		  int row=current.b.getRow();int col=current.b.getCol();
+		  ArrayList<vertex> operators=new ArrayList<vertex>();
 		  //for each legal operator of start
 		  //operator left
 		  if(lastStep!=move.Left&&col<current.b.mat[0].length-1&&current.b.mat[row][col+1].getColor()!=0) 
 		  {
 			  Board matLeft=current.b.createLeft();
-			  String keyString=matLeft.uniqeString();
-			  if(!closeList.containsKey(keyString)&&!openList.containsKey(keyString))
-			  {
-				  vertex left=new vertex(matLeft,current.getCost()+current.b.mat[row][col+1].getColor(),current.getCost()+current.b.mat[row][col+1].getColor()+matLeft.heuristicFunction(),move.Right,current.getPath()+""+matLeft.mat[row][col].getNum()+"L-");
-				  countVertices++;
-				  pq.add(left);
-				  openList.put(keyString, left);
-			  }
-			  else
-				  if(openList.containsKey(keyString)&&openList.get(keyString).getCostH()>current.getCostH())
-				  {
-					  vertex left=new vertex(matLeft,current.getCost()+current.b.mat[row][col+1].getColor(),current.getCost()+current.b.mat[row][col+1].getColor()+matLeft.heuristicFunction(),move.Right,current.getPath()+""+matLeft.mat[row][col].getNum()+"L-");
-					  openList.replace(keyString, openList.get(keyString), left);
-					  pq.remove(openList.get(keyString));
-					  pq.add(left);
-				  }
+			  operators.add(new vertex(matLeft,current.getCost()+current.b.mat[row][col+1].getColor(),current.getCost()+current.b.mat[row][col+1].getColor()+matLeft.heuristicFunction(),move.Right,current.getPath()+""+matLeft.mat[row][col].getNum()+"L-"));
 		  }
 		  //operator up
 		  if(lastStep!=move.Up&&row<current.b.mat.length-1&&current.b.mat[row+1][col].getColor()!=0) 
 		  {
 			  Board matUp=current.b.createUp();
-			  String keyString=matUp.uniqeString();
-			  if(!closeList.containsKey(keyString)&&!openList.containsKey(keyString))
-			  {
-				  vertex up=new vertex(matUp,current.getCost()+current.b.mat[row+1][col].getColor(),current.getCost()+current.b.mat[row+1][col].getColor()+matUp.heuristicFunction(),move.Down,current.getPath()+""+matUp.mat[row][col].getNum()+"U-");
-				  countVertices++;
-				  pq.add(up);
-				  openList.put(keyString, up);
-			  }
-			  else
-				  if(openList.containsKey(keyString)&&openList.get(keyString).getCostH()>current.getCostH())
-				  {
-					  vertex up=new vertex(matUp,current.getCost()+current.b.mat[row+1][col].getColor(),current.getCost()+current.b.mat[row+1][col].getColor()+matUp.heuristicFunction(),move.Down,current.getPath()+""+matUp.mat[row][col].getNum()+"U-");
-					  openList.replace(keyString, openList.get(keyString), up);
-					  pq.remove(openList.get(keyString));
-					  pq.add(up);
-				  }
-
+			  operators.add(new vertex(matUp,current.getCost()+current.b.mat[row+1][col].getColor(),current.getCost()+current.b.mat[row+1][col].getColor()+matUp.heuristicFunction(),move.Down,current.getPath()+""+matUp.mat[row][col].getNum()+"U-"));
 		  }
 		  if(lastStep!=move.Right&&col>0&&current.b.mat[row][col-1].getColor()!=0) //step right
 		  {
 			  Board matRight=current.b.createRight();
-			  String keyString=matRight.uniqeString();
-			  if(!closeList.containsKey(keyString)&&!openList.containsKey(keyString))
-			  {
-				  vertex right=new vertex(matRight,current.getCost()+current.b.mat[row][col-1].getColor(),current.getCost()+current.b.mat[row][col-1].getColor()+matRight.heuristicFunction(),move.Left,current.getPath()+""+matRight.mat[row][col].getNum()+"R-");
-				  countVertices++;
-				  pq.add(right);
-				  openList.put(keyString, right);
-			  }
-			  else
-				  if(openList.containsKey(keyString)&&openList.get(keyString).getCostH()>current.getCostH())
-				  {
-					  vertex right=new vertex(matRight,current.getCost()+current.b.mat[row][col-1].getColor(),current.getCost()+current.b.mat[row][col-1].getColor()+matRight.heuristicFunction(),move.Left,current.getPath()+""+matRight.mat[row][col].getNum()+"R-");
-					  openList.replace(keyString, openList.get(keyString), right);
-					  pq.remove(openList.get(keyString));
-					  pq.add(right);
-				  }
+			  operators.add(new vertex(matRight,current.getCost()+current.b.mat[row][col-1].getColor(),current.getCost()+current.b.mat[row][col-1].getColor()+matRight.heuristicFunction(),move.Left,current.getPath()+""+matRight.mat[row][col].getNum()+"R-"));
 		  }
 		  if(lastStep!=move.Down&&row>0&&current.b.mat[row-1][col].getColor()!=0) //step down
 		  {
 			  Board matDown=current.b.createDown();
-			  String keyString=matDown.uniqeString();
+			  operators.add(new vertex(matDown,current.getCost()+current.b.mat[row-1][col].getColor(),current.getCost()+current.b.mat[row-1][col].getColor()+matDown.heuristicFunction(),move.Up,current.getPath()+""+matDown.mat[row][col].getNum()+"D-"));
+		  }
+		  for(int i=0;i<operators.size();)
+		  {
+			  countVertices++;
+			  vertex op=operators.remove(0);
+			  String keyString=op.b.uniqeString();
 			  if(!closeList.containsKey(keyString)&&!openList.containsKey(keyString))
 			  {
-				  vertex down=new vertex(matDown,current.getCost()+current.b.mat[row-1][col].getColor(),current.getCost()+current.b.mat[row-1][col].getColor()+matDown.heuristicFunction(),move.Up,current.getPath()+""+matDown.mat[row][col].getNum()+"D-");
-				  countVertices++;
-				  pq.add(down);
-				  openList.put(keyString, down);
+				  pq.add(op);
+				  openList.put(keyString,op);
 			  }
 			  else
 				  if(openList.containsKey(keyString)&&openList.get(keyString).getCostH()>current.getCostH())
 				  {
-					  vertex down=new vertex(matDown,current.getCost()+current.b.mat[row-1][col].getColor(),current.getCost()+current.b.mat[row-1][col].getColor()+matDown.heuristicFunction(),move.Up,current.getPath()+""+matDown.mat[row][col].getNum()+"D-");
-					  openList.replace(keyString, openList.get(keyString), down);
+					  openList.replace(keyString, openList.get(keyString), op);
 					  pq.remove(openList.get(keyString));
-					  pq.add(down);
+					  pq.add(op);
 				  }
 		  }
 	  }
@@ -493,9 +472,8 @@ public class draft
 	  int trash=start.getCostH();
 	  while(trash<10000)
 	  {
-		  countVertices=1;
-		  start.setOut(false);
 		  int minf=Integer.MAX_VALUE;
+		  start.setOut(false);
 		  stack.push(start);
 		  hMap.put(start.b.uniqeString(), start);
 		  while(!stack.empty())
@@ -509,148 +487,48 @@ public class draft
 				  stack.push(front); //to save the path of the solution
 				  move lastStep=front.getLastStep();
 				  int row=front.b.getRow();int col=front.b.getCol();
+				  ArrayList<vertex> operators=new ArrayList<vertex>();
 				  //check each operator
 				  if(lastStep!=move.Left&&col<front.b.mat[0].length-1&&front.b.mat[row][col+1].getColor()!=0) 
 				  {
-					  countVertices++;
-					  boolean continueToNextOp=false;
 					  Board matLeft=front.b.createLeft();
-					  vertex left=new vertex(matLeft,front.getCost()+front.b.mat[row][col+1].getColor(),front.getCost()+front.b.mat[row][col+1].getColor()+matLeft.heuristicFunction(),move.Right,"");
-					  if(left.getCostH()>trash) //cut this branch
-					  {
-						  if(minf>left.getCostH())
-							  minf=left.getCostH();
-						  continueToNextOp=true;
-					  }
-					  if(!continueToNextOp&&hMap.containsKey(matLeft.uniqeString())) //loop avoidance
-					  {
-						  vertex contain=hMap.get(matLeft.uniqeString());
-						  if(!contain.getOut())
-						  {
-							  if(contain.getCostH()>left.getCostH())// if this is better f(g)
-							  {
-								  hMap.remove(matLeft.uniqeString());
-								  stack.remove(contain);
-							  }
-							  else
-								  continueToNextOp=true;
-						  }
-						  else
-							  continueToNextOp=true;
-					  }
-					  if(!continueToNextOp&&matLeft.isAns()) //if this is the goal
-					  {
-						  String path=reversePath(stack);
-						  left.setPath(path+matLeft.mat[row][col].getNum()+"L-");
-						  return left;
-					  }
-					  if(!continueToNextOp) //if this is the goal
-					  {
-						  stack.push(left);
-						  hMap.put(left.b.uniqeString(), left);
-					  }
+					  operators.add(new vertex(matLeft,front.getCost()+front.b.mat[row][col+1].getColor(),front.getCost()+front.b.mat[row][col+1].getColor()+matLeft.heuristicFunction(),move.Right,""));
 				  }
 				  //operator up
 				  if(lastStep!=move.Up&&row<front.b.mat.length-1&&front.b.mat[row+1][col].getColor()!=0) 
 				  {
-					  countVertices++;
-					  boolean continueToNextOp=false;
 					  Board matUp=front.b.createUp();
-					  vertex up=new vertex(matUp,front.getCost()+front.b.mat[row+1][col].getColor(),front.getCost()+front.b.mat[row+1][col].getColor()+matUp.heuristicFunction(),move.Down,"");
-					  if(up.getCostH()>trash) //cut this branch
-					  {
-						  if(minf>up.getCostH())
-							  minf=up.getCostH();
-						  continueToNextOp=true;
-					  }
-					  if(!continueToNextOp&&hMap.containsKey(matUp.uniqeString())) //loop avoidance
-					  {
-						  vertex contain=hMap.get(matUp.uniqeString());
-						  if(!contain.getOut())
-						  {
-							  if(contain.getCostH()>up.getCostH())// if this is better f(g)
-							  {
-								  hMap.remove(matUp.uniqeString());
-								  stack.remove(contain);
-							  }
-							  else
-								  continueToNextOp=true;
-						  }
-						  else
-							  continueToNextOp=true;
-					  }
-					  if(!continueToNextOp&&matUp.isAns()) //if this is the goal
-					  {
-						  String path=reversePath(stack);
-						  up.setPath(path+matUp.mat[row][col].getNum()+"U-");
-						  return up;
-					  }
-					  if(!continueToNextOp) //if this is the goal
-					  {
-						  stack.push(up);
-						  hMap.put(up.b.uniqeString(), up);
-					  }
+					  operators.add(new vertex(matUp,front.getCost()+front.b.mat[row+1][col].getColor(),front.getCost()+front.b.mat[row+1][col].getColor()+matUp.heuristicFunction(),move.Down,""));				  
 				  }
 				  if(lastStep!=move.Right&&col>0&&front.b.mat[row][col-1].getColor()!=0) //step right
 				  {
-					  countVertices++;
-					  boolean continueToNextOp=false;
 					  Board matRight=front.b.createRight();
-					  vertex right=new vertex(matRight,front.getCost()+front.b.mat[row][col-1].getColor(),front.getCost()+front.b.mat[row][col-1].getColor()+matRight.heuristicFunction(),move.Left,"");
-					  if(right.getCostH()>trash) //cut this branch
-					  {
-						  if(minf>right.getCostH())
-							  minf=right.getCostH();
-						  continueToNextOp=true;
-					  }
-					  if(!continueToNextOp&&hMap.containsKey(matRight.uniqeString())) //loop avoidance
-					  {
-						  vertex contain=hMap.get(matRight.uniqeString());
-						  if(!contain.getOut())
-						  {
-							  if(contain.getCostH()>right.getCostH())// if this is better f(g)
-							  {
-								  hMap.remove(matRight.uniqeString());
-								  stack.remove(contain);
-							  }
-							  else
-								  continueToNextOp=true;
-						  }
-						  else
-							  continueToNextOp=true;
-					  }
-					  if(!continueToNextOp&&matRight.isAns()) //if this is the goal
-					  {
-						  String path=reversePath(stack);
-						  right.setPath(path+matRight.mat[row][col].getNum()+"R-");
-						  return right;
-					  }
-					  if(!continueToNextOp) //if this is the goal
-					  {
-						  stack.push(right);
-						  hMap.put(right.b.uniqeString(), right);
-					  }
+					  operators.add(new vertex(matRight,front.getCost()+front.b.mat[row][col-1].getColor(),front.getCost()+front.b.mat[row][col-1].getColor()+matRight.heuristicFunction(),move.Left,""));
 				  }
 				  if(lastStep!=move.Down&&row>0&&front.b.mat[row-1][col].getColor()!=0) //step down
 				  {
-					  countVertices++;
-					  boolean continueToNextOp=false;
 					  Board matDown=front.b.createDown();
-					  vertex down=new vertex(matDown,front.getCost()+front.b.mat[row-1][col].getColor(),front.getCost()+front.b.mat[row-1][col].getColor()+matDown.heuristicFunction(),move.Up,"");
-					  if(down.getCostH()>trash) //cut this branch
+					  operators.add(new vertex(matDown,front.getCost()+front.b.mat[row-1][col].getColor(),front.getCost()+front.b.mat[row-1][col].getColor()+matDown.heuristicFunction(),move.Up,""));
+				  }
+				  for(int i=0;i<operators.size();)
+				  {
+					  countVertices++;
+					  vertex op=operators.remove(0);
+					  boolean continueToNextOp=false;
+					  if(op.getCostH()>trash) //cut this branch
 					  {
-						  if(minf>down.getCostH())
-							  minf=down.getCostH();
+						  if(minf>op.getCostH())
+							  minf=op.getCostH();
 						  continueToNextOp=true;
 					  }
-					  if(!continueToNextOp&&hMap.containsKey(matDown.uniqeString())) //loop avoidance
+					  if(!continueToNextOp&&hMap.containsKey(op.b.uniqeString())) //loop avoidance
 					  {
-						  vertex contain=hMap.get(matDown.uniqeString());
+						  vertex contain=hMap.get(op.b.uniqeString());
 						  if(!contain.getOut())
 						  {
-							  if(contain.getCostH()>down.getCostH())// if this is better f(g)
+							  if(contain.getCostH()>op.getCostH())// if this is better f(g)
 							  {
-								  hMap.remove(matDown.uniqeString());
+								  hMap.remove(contain.b.uniqeString());
 								  stack.remove(contain);
 							  }
 							  else
@@ -659,16 +537,16 @@ public class draft
 						  else
 							  continueToNextOp=true;
 					  }
-					  if(!continueToNextOp&&matDown.isAns()) //if this is the goal
+					  if(!continueToNextOp&&op.b.isAns()) //if this is the goal
 					  {
 						  String path=reversePath(stack);
-						  down.setPath(path+matDown.mat[row][col].getNum()+"D-");
-						  return down;
+						  op.setPath(path+op.b.mat[row][col].getNum()+"D-");
+						  return op;
 					  }
 					  if(!continueToNextOp) //if this is the goal
 					  {
-						  stack.push(down);
-						  hMap.put(down.b.uniqeString(), down);
+						  stack.push(op);
+						  hMap.put(op.b.uniqeString(), op);
 					  }
 				  }
 			  }
@@ -683,7 +561,8 @@ public class draft
 	  vertex result=null;
 	  Stack<vertex> stack=new Stack<vertex>();stack.push(start);
 	  HashMap<String, vertex> hMap= new HashMap<String, vertex>();hMap.put(start.b.uniqeString(), start);
-	  int trash=Integer.MAX_VALUE;
+	//  int trash=Integer.MAX_VALUE;
+	  int trash=200;
 	  while(!stack.empty())
 	  {
 		  vertex front=stack.pop();		  
@@ -789,20 +668,7 @@ public class draft
 				long startTime= System.currentTimeMillis();
 				vertex result=bfs(start);
 				long totalTime= System.currentTimeMillis()-startTime;
-				if(result!=null)
-				{
-					if(!printOpenList) 
-						writeToFile(result.getPath(),result.getCost(),totalTime/1000F);
-					else
-						printToScreen(result.getPath(),result.getCost(),totalTime/1000F);
-				}
-				else
-				{
-					if(!printOpenList) 
-						writeToFile("",-1,totalTime/1000F);
-					else
-						printToScreen("",-1,totalTime/1000F);;
-				}
+				printResult(result,totalTime);
 				break;
 			}
 			case "DFID":
@@ -810,20 +676,7 @@ public class draft
 				long startTime= System.currentTimeMillis();
 				vertex result=dfid(start);
 				long totalTime= System.currentTimeMillis()-startTime;
-				if(result!=null)
-				{
-					if(!printOpenList) 
-						writeToFile(result.getPath().substring(0,result.getPath().length()-1),result.getCost(),totalTime/1000F);
-					else
-						printToScreen(result.getPath().substring(0,result.getPath().length()-1),result.getCost(),totalTime/1000F);
-				}
-				else
-				{
-					if(!printOpenList) 
-						writeToFile("",-1,totalTime/1000F);
-					else
-						printToScreen("",-1,totalTime/1000F);;
-				}
+				printResult(result,totalTime);
 				break;
 			}
 			case "A*":
@@ -831,20 +684,7 @@ public class draft
 				long startTime= System.currentTimeMillis();
 				vertex result=AStar(start);
 				long totalTime= System.currentTimeMillis()-startTime;
-				if(result!=null)
-				{
-					if(!printOpenList) 
-						writeToFile(result.getPath().substring(0,result.getPath().length()-1),result.getCost(),totalTime/1000F);
-					else
-						printToScreen(result.getPath().substring(0,result.getPath().length()-1),result.getCost(),totalTime/1000F);
-				}
-				else
-				{
-					if(!printOpenList) 
-						writeToFile("",-1,totalTime/1000F);
-					else
-						printToScreen("",-1,totalTime/1000F);;
-				}
+				printResult(result,totalTime);
 				break;
 			}
 			case "IDA*":
@@ -852,20 +692,8 @@ public class draft
 				long startTime= System.currentTimeMillis();
 				vertex result=IDA(start);
 				long totalTime= System.currentTimeMillis()-startTime;
-				if(result!=null)
-				{
-					if(!printOpenList) 
-						writeToFile(result.getPath().substring(0,result.getPath().length()-1),result.getCost(),totalTime/1000F);
-					else
-						printToScreen(result.getPath().substring(0,result.getPath().length()-1),result.getCost(),totalTime/1000F);
-				}
-				else
-				{
-					if(!printOpenList) 
-						writeToFile("",-1,totalTime/1000F);
-					else
-						printToScreen("",-1,totalTime/1000F);;
-				}
+				printResult(result,totalTime);
+
 				break;
 			}
 			case "DFBnB":
@@ -873,20 +701,7 @@ public class draft
 				long startTime= System.currentTimeMillis();
 				vertex result=DFBnB(start);
 				long totalTime= System.currentTimeMillis()-startTime;
-				if(result!=null)
-				{
-					if(!printOpenList) 
-						writeToFile(result.getPath().substring(0,result.getPath().length()-1),result.getCost(),totalTime/1000F);
-					else
-						printToScreen(result.getPath().substring(0,result.getPath().length()-1),result.getCost(),totalTime/1000F);
-				}
-				else
-				{
-					if(!printOpenList) 
-						writeToFile("",-1,totalTime/1000F);
-					else
-						printToScreen("",-1,totalTime/1000F);;
-				}
+				printResult(result,totalTime);
 				break;
 			}
 			default :
