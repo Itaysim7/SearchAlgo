@@ -1,5 +1,3 @@
-import java.util.Stack;
-
 /**
  * This class represents a node in a graph,every vertex has mat, rowEmpty, colEmpty, cost, lastStep, path
  * mat is matrix type of cell,rowEmpty and V represent the place of the empty cell in the matrix.
@@ -83,6 +81,10 @@ public class vertex
 	{
 		this.timestamp=t;
 	}
+	/**
+	 * The function will do deep copy for the vertex
+	 * @return vertex 
+	 */
 	public vertex copy()
 	{
 		vertex copy=new vertex(b,cost,costH,lastStep,path);
@@ -90,21 +92,21 @@ public class vertex
 		copy.setOut(this.out);
 		return copy;	
 	}
-	  /**
-	   * The function will return the last step represent by One char
-	   * @return String 
-	   */
-	  public String lastStep() 
-	  {
-		  if(lastStep==move.Right)
-			  return "L-";
-		  if(lastStep==move.Down)
-			  return "U-";
-		  if(lastStep==move.Left)
-			  return "R-";
-		  if(lastStep==move.Up)
-			  return "D-";
-		  return "";
-	  }
+	/**
+	 * The function will return the last step represent by One char
+	 * @return String 
+	 */
+	public String lastStep() 
+	{
+		if(lastStep==move.Right)
+			return "L-";
+		if(lastStep==move.Down)
+			return "U-";
+		if(lastStep==move.Left)
+			return "R-";
+		if(lastStep==move.Up)
+			return "D-";
+		return "";
+	}
 
 }

@@ -1,4 +1,4 @@
-2R-8D-5R-1U-8L-2L-6D-5R-1R-7D-4L-1U-2U-8R-7D-4D-1L-2U-5L-6U
-Num: 340453
-Cost: 20
-0.688 secondes
+1U-5L-7D-2L-3U-6U-8R-7D-5R-4U-7L-8L
+Num: 69
+Cost: 128
+0.004 secondes

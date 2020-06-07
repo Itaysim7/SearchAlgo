@@ -1,11 +1,21 @@
+/**
+ * This class represents a search type of DFID to solve the problem 
+ * countVertices will count number of state the generated before the solution found
+ * start - the start state for the problem
+ * @author Itay Simhayev
+ */
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 public class DFID implements SearchAlgorithm
 {
 	private  int countVertices=1;
 	private vertex start;
-	public DFID(vertex s)
+	private boolean printOpenList;
+
+	public DFID(vertex s,boolean pol)
 	{
+		printOpenList=pol;
 		start=s;
 	}
 	@Override	
@@ -17,7 +27,8 @@ public class DFID implements SearchAlgorithm
   {
 	  boolean find=false;
 	  vertex result=null;
-	  for(int i=1;i<10000&&!find;i++)
+	  int infimum=Integer.MAX_VALUE;//max depth of search
+	  for(int i=1;i<infimum&&!find;i++)
 	  {
 		  HashMap<String, vertex> verString= new HashMap<String, vertex>();
 		  result=dfs(start,i,verString);
@@ -42,11 +53,13 @@ public class DFID implements SearchAlgorithm
 	 */
 	private  vertex dfs(vertex current,int depth,HashMap<String, vertex> h) 
 	{
-		if(current.b.isAns())
+		if(current.b.isAns())// if this is the ans
 			return current;
-		if(depth==0)
+		if(depth==0) //if this is the last depth and still the answer not found
 			return null;
 		h.put(current.b.uniqeString(),current);
+		 if(printOpenList)
+			  printOpenL(h);
 		boolean isCutOff=false;
 		move lastStep=current.getLastStep();
 		int row=current.b.getRow();int col=current.b.getCol();
@@ -120,5 +133,37 @@ public class DFID implements SearchAlgorithm
 			return null;
 		return new vertex(current.b,-1,current.getLastStep(),current.getPath());
 	}
+	/**
+	 * print the open list to the screen
+	 */
+	@Override
+	public void printOpenL(HashMap<String, vertex> h) 
+	{
+		System.out.println("-----------new iteration----------");
+		for (Entry<String, vertex> entry : h.entrySet())
+		{
+			String keyTemp=entry.getKey();
+			printme(h.get(keyTemp).b.mat);
+		}
+	}
+	/**
+	 * print the board of the vertex
+	 */
+	private void printme(cell[][]mat) 
+	{
+		  for(int i=0;i<mat.length;i++) 
+		  {
+			  for(int j=0;j<mat[i].length;j++)
+			  {
+				  if(mat[i][j].getNum()!=0)
+					  System.out.print(mat[i][j].getNum()+",");
+				  else
+					  System.out.print("_,");
+			  }
+			  System.out.println();
+		  }
+		  System.out.println();
+	}
+
 
 }

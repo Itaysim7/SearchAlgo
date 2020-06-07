@@ -1,6 +1,6 @@
 import java.io.*;
 
-public class draft 
+public class Ex1 
 {
 	static boolean printTimeRunning=true;
 	static boolean printOpenList=true;
@@ -86,7 +86,8 @@ public class draft
 	  {
 		  if(cells.length()>0)//if the string empty return
 		  {
-			  cells=cells.substring(1);//delete the char '_' from the string
+			  if(cells.charAt(0)==' ')
+				  cells=cells.substring(1);//delete the char '_' from the string
 			  boolean isEmpty=false;
 			  while(!isEmpty)
 			  {
@@ -105,8 +106,7 @@ public class draft
 		  }
 	  }
 //////////////////helpful functions for the algorithms/////////////////////
-	  
-	
+///////////////////////////////////////////////////////////////////////////
 	  /**
 	   * The function will write to a file  the output of the algorithm
 	   * @param path - path from the node start to the goal start
@@ -137,24 +137,7 @@ public class draft
       System.out.println("Error file is not writable\\n");
 	}
   }
-  /**
-   * The function will write to a file  the output of the algorithm
-   * @param path - path from the node start to the goal start
-   * @param cost - the cost from the node start to the goal 
-   * @param time - time for the algorithm to find the goal node
-   */	  
-	public static void printToScreen(String path,int cost,float time,int countVertices)
-	{
-		if(path.length()>0)
-			System.out.println(path);
-		else
-			System.out.println("no path");
-		System.out.println("Num: "+countVertices);
-		if(cost!=-1)
-			System.out.println("Cost: "+cost);
-		if(printTimeRunning)
-			System.out.println(time+ " secondes");
-	}
+
 	/**
 	 * The function will write or print to the screen the result of the algorithm
 	 * @param result- vertex of the answer
@@ -163,98 +146,91 @@ public class draft
 	public static void printResult(vertex result,long totalTime,int countVertices) 
 	{
 		if(result!=null)
-		{
-			if(!printOpenList) 
-				writeToFile(result.getPath().substring(0,result.getPath().length()-1),result.getCost(),totalTime/1000F,countVertices);
-			else
-				printToScreen(result.getPath().substring(0,result.getPath().length()-1),result.getCost(),totalTime/1000F,countVertices);
-		}
+			writeToFile(result.getPath().substring(0,result.getPath().length()-1),result.getCost(),totalTime/1000F,countVertices);
 		else
-		{
-			if(!printOpenList) 
-				writeToFile("",-1,totalTime/1000F,countVertices);
-			else
-				printToScreen("",-1,totalTime/1000F,countVertices);;
-		}
+			writeToFile("",-1,totalTime/1000F,countVertices);
 	}
-
-  ///////////////////algorithms////////////////////////////
-
-
-
+	/**
+	 * The function will check if there is black cell not in his place 
+	 * @param start- the start state of the vertex
+	 * @return false if there is no solution
+	 */
+	public static boolean earlyCheck(cell [][] start) 
+	{
+		 for(int i=0;i<start.length;i++)
+		  {
+			  for(int j=0;j<start[i].length;j++)
+			  {
+				  if(start[i][j].getColor()==0&&start[i][j].getNum()!=i*start[i].length+j+1)
+					  return false;
+			  }
+		  }
+		 return true;
+	}
 
   public static void main(String[] args)throws Exception 
   { 
 	  cell [][] numberCells=readFromFile();
-	  vertex start=new vertex(numberCells,0,move.None,"");
-	  switch(algo)
-		{//case for algorithm
-			case "BFS":
-			{
-				long startTime= System.currentTimeMillis();
-				SearchAlgorithm bfs=new BFS(start);
-				vertex result=bfs.doAlgo();
-				long totalTime= System.currentTimeMillis()-startTime;
-				printResult(result,totalTime,bfs.getCountVertices());
-				break;
-			}
-			case "DFID":
-			{
-				long startTime= System.currentTimeMillis();
-				SearchAlgorithm dfid=new DFID(start);
-				vertex result=dfid.doAlgo();
-				long totalTime= System.currentTimeMillis()-startTime;
-				printResult(result,totalTime,dfid.getCountVertices());
-				break;
-			}
-			case "A*":
-			{
-				long startTime= System.currentTimeMillis();
-				SearchAlgorithm a=new ASTAR(start);
-				vertex result=a.doAlgo();
-				long totalTime= System.currentTimeMillis()-startTime;
-				printResult(result,totalTime,a.getCountVertices());
-				break;
-			}
-			case "IDA*":
-			{
-				long startTime= System.currentTimeMillis();
-				SearchAlgorithm ida=new IDA(start);
-				vertex result=ida.doAlgo();
-				long totalTime= System.currentTimeMillis()-startTime;
-				printResult(result,totalTime,ida.getCountVertices());
+	  if(earlyCheck(numberCells))//if there is no solution don't continue
+	  {
+		  vertex start=new vertex(numberCells,0,move.None,"");
+		  switch(algo)
+			{//case for algorithm
+				case "BFS":
+				{
+					long startTime= System.currentTimeMillis();
+					SearchAlgorithm bfs=new BFS(start,printOpenList);
+					vertex result=bfs.doAlgo();
+					long totalTime= System.currentTimeMillis()-startTime;
+					printResult(result,totalTime,bfs.getCountVertices());
+					break;
+				}
+				case "DFID":
+				{
+					long startTime= System.currentTimeMillis();
+					SearchAlgorithm dfid=new DFID(start,printOpenList);
+					vertex result=dfid.doAlgo();
+					long totalTime= System.currentTimeMillis()-startTime;
+					printResult(result,totalTime,dfid.getCountVertices());
+					break;
+				}
+				case "A*":
+				{
+					long startTime= System.currentTimeMillis();
+					SearchAlgorithm a=new ASTAR(start,printOpenList);
+					vertex result=a.doAlgo();
+					long totalTime= System.currentTimeMillis()-startTime;
+					printResult(result,totalTime,a.getCountVertices());
+					break;
+				}
+				case "IDA*":
+				{
+					long startTime= System.currentTimeMillis();
+					SearchAlgorithm ida=new IDA(start,printOpenList);
+					vertex result=ida.doAlgo();
+					long totalTime= System.currentTimeMillis()-startTime;
+					printResult(result,totalTime,ida.getCountVertices());
 
-				break;
-			}
-			case "DFBnB":
-			{
-				long startTime= System.currentTimeMillis();
-				SearchAlgorithm dfbnb=new DFBnB(start);
-				vertex result=dfbnb.doAlgo();
-				long totalTime= System.currentTimeMillis()-startTime;
-				printResult(result,totalTime,dfbnb.getCountVertices());
-				break;
-			}
-			default :
-			{
-				throw new RuntimeException("There is not such algorithm");
-			}
-		}
+					break;
+				}
+				case "DFBnB":
+				{
+					long startTime= System.currentTimeMillis();
+					SearchAlgorithm dfbnb=new DFBnB(start,printOpenList);
+					vertex result=dfbnb.doAlgo();
+					long totalTime= System.currentTimeMillis()-startTime;
+					printResult(result,totalTime,dfbnb.getCountVertices());
+					break;
+				}
+				default :
+				{
+					throw new RuntimeException("There is not such algorithm");
+				}
+			} 
+	  }
+	  else
+			printResult(null,0,1);
+
+
   } 
 } 
-
-
-
-
-//public static void printme(cell[][]mat) 
-//{
-//	  for(int i=0;i<mat.length;i++) 
-//	  {
-//		  for(int j=0;j<mat[i].length;j++)
-//		  {
-//			  System.out.print(mat[i][j].getNum()+",");
-//		  }
-//		  System.out.println();
-//	  }
-//	  System.out.println();
-//}

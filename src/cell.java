@@ -1,7 +1,6 @@
 /**
  * This class represents a cell in matrix with two fields  num, color.
  * num represent the number in the cell and the color represent the color of the cell
- * 0 for green,1 for black and 2 for red. 
  * 0 for black,1 for green and 30 for red. 
  * @author Itay Simhayev
  */

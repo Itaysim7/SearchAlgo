@@ -1,13 +1,24 @@
+/**
+ * This class represents a search type of bfs to solve the problem 
+ * countVertices will count number of state the generated before the solution found
+ * start - the start state for the problem
+ * @author Itay Simhayev
+ */
+
 import java.util.HashMap;
+
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Map.Entry;
 
 public class BFS implements SearchAlgorithm
 {
 	private  int countVertices=1;
 	private vertex start;
-	public BFS(vertex s)
+	private boolean printOpenList;
+	public BFS(vertex s,boolean pol)
 	{
+		printOpenList=pol;
 		start=s;
 	}
 	@Override
@@ -20,10 +31,14 @@ public class BFS implements SearchAlgorithm
 		  Queue<vertex> queue = new LinkedList<>();
 		  queue.add(start);
 		  HashMap<String, vertex> openList= new HashMap<String, vertex>();
+		  openList.put(start.b.uniqeString(), start);
 		  HashMap<String, vertex> closeList= new HashMap<String, vertex>();
-		  while(!queue.isEmpty())
+		  while(!queue.isEmpty()) //while there is more state that not generated his child's
 		  {
+			  if(printOpenList)
+				  printOpenL(openList);
 			  vertex temp=queue.remove();
+			  openList.remove(temp.b.uniqeString());
 			  closeList.put(temp.b.uniqeString(), temp);
 			  move lastStep=temp.getLastStep();
 			  int row=temp.b.getRow();int col=temp.b.getCol();
@@ -85,6 +100,37 @@ public class BFS implements SearchAlgorithm
 	public int getCountVertices() 
 	{
 		return countVertices;
+	}
+	/**
+	 * print the open list to the screen
+	 */
+	@Override
+	public void printOpenL(HashMap<String, vertex> h) 
+	{
+		System.out.println("-----------new iteration----------");
+		for (Entry<String, vertex> entry : h.entrySet())
+		{
+			String keyTemp=entry.getKey();
+			printme(h.get(keyTemp).b.mat);
+		}
+	}
+	/**
+	 * print the board of the vertex
+	 */
+	private void printme(cell[][]mat) 
+	{
+		  for(int i=0;i<mat.length;i++) 
+		  {
+			  for(int j=0;j<mat[i].length;j++)
+			  {
+				  if(mat[i][j].getNum()!=0)
+					  System.out.print(mat[i][j].getNum()+",");
+				  else
+					  System.out.print("_,");
+			  }
+			  System.out.println();
+		  }
+		  System.out.println();
 	}
 
 }

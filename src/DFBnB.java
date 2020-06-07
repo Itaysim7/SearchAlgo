@@ -1,14 +1,29 @@
+/**
+ * This class represents a search type of DFBnB to solve the problem 
+ * countVertices will count number of state the generated before the solution found
+ * start - the start state for the problem
+ * @author Itay Simhayev
+ */
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
+import java.util.Map.Entry;
 
 public class DFBnB implements SearchAlgorithm
 {
 	private  int countVertices=1;
 	private vertex start;
-	public DFBnB(vertex s)
+	private int infimum;
+	private boolean printOpenList;
+	
+	public DFBnB(vertex s,boolean pol)
 	{
+		printOpenList=pol;
 		start=s;
+		int count=countCell();
+		if(count>12)
+			infimum=Integer.MAX_VALUE;
+		infimum=factorial(count);
 	}
 	@Override
   /**
@@ -19,12 +34,13 @@ public class DFBnB implements SearchAlgorithm
 	  vertex result=null;
 	  Stack<vertex> stack=new Stack<vertex>();stack.push(start);
 	  HashMap<String, vertex> hMap= new HashMap<String, vertex>();hMap.put(start.b.uniqeString(), start);
-	//  int trash=Integer.MAX_VALUE;
-	  int trash=40320;
-	  while(!stack.empty())
+	  int trash=infimum;
+	  while(!stack.empty()) //while there is more state that not generated his child's
 	  {
+		  if(printOpenList)
+			  printOpenL(hMap);
 		  vertex front=stack.pop();		  
-		  if(front.getOut())
+		  if(front.getOut()) 
 			  hMap.remove(front.b.uniqeString());
 		  else
 		  {
@@ -61,24 +77,24 @@ public class DFBnB implements SearchAlgorithm
 			  for(int i=0;i<operators.size();i++)
 			  {
 				  vertex op=operators.get(i);
-				  if(op.getCostH()>=trash)
+				  if(op.getCostH()>=trash) //if the cost of this vertex and the other in the list is higher then the trash
 				  {
 					  for(int j=i;j<operators.size();)
 						  operators.remove(j);
 				  }
 				  else
 				  {
-					  if(hMap.containsKey(op.b.uniqeString())&&hMap.get(op.b.uniqeString()).getOut())
+					  if(hMap.containsKey(op.b.uniqeString())&&hMap.get(op.b.uniqeString()).getOut())//if is already in the list and marked as out
 					  {
 						  operators.remove(i);
 						  i--;
 					  }
 					  else
 					  {
-						  if(hMap.containsKey(op.b.uniqeString())&&!hMap.get(op.b.uniqeString()).getOut())
+						  if(hMap.containsKey(op.b.uniqeString())&&!hMap.get(op.b.uniqeString()).getOut())//if is already in the list and not marked as out
 						  {
 							  vertex contain=hMap.get(op.b.uniqeString());
-							  if(contain.getCostH()<=op.getCostH())
+							  if(contain.getCostH()<=op.getCostH()) //if contain has higher cost then the state in the open list
 							  {
 								  operators.remove(i);
 								  i--;
@@ -105,7 +121,7 @@ public class DFBnB implements SearchAlgorithm
 					  }
 				  }
 			  }
-			  while(!operators.isEmpty())
+			  while(!operators.isEmpty()) //add all state to the open list
 			  {
 				  stack.push(operators.get(operators.size()-1));
 				  hMap.put(operators.get(operators.size()-1).b.uniqeString(), operators.get(operators.size()-1));
@@ -119,7 +135,36 @@ public class DFBnB implements SearchAlgorithm
 	{
 		return countVertices;
 	}
-	
+	 /**
+	   * The function will count the cell that not black in the matrix
+	   * @return number of cell 
+	   */
+	public int countCell() 
+	{
+		int count=0;
+		for(int i=0;i<start.b.mat.length;i++)
+		{
+			for(int j=0;j<start.b.mat[i].length;j++)
+			{
+				if(start.b.mat[i][j].getColor()!=0)
+					count++;
+			}
+		}
+		return count;
+	}
+	 /**
+	   * The function will return the factorial of n
+	   * @param n- input to calculate
+	   * @return factorial of n 
+	   */
+	public int factorial(int n)
+	{
+	    int fact = 1;
+	    for (int i = 2; i <= n; i++) {
+	        fact = fact * i;
+	    }
+	    return fact;
+	}
 	  /**
 	   * The function will return the solution path for ida*, DFBnb algorithms
 	   * @param s- Stack type of vertex 
@@ -155,5 +200,39 @@ public class DFBnB implements SearchAlgorithm
 		  }
 		  return path;
 	  }
+	  
+
+	  /**
+	   * print the open list to the screen
+	   */
+	  @Override
+	  public void printOpenL(HashMap<String, vertex> h) 
+	  {
+		  System.out.println("-----------new iteration----------");
+		  for (Entry<String, vertex> entry : h.entrySet())
+		  {
+			  String keyTemp=entry.getKey();
+			  printme(h.get(keyTemp).b.mat);
+		  }
+	  }
+	  /**
+	   * print the board of the vertex
+	   */
+	  private void printme(cell[][]mat) 
+	  {
+		  for(int i=0;i<mat.length;i++) 
+		  {
+			  for(int j=0;j<mat[i].length;j++)
+			  {
+				  if(mat[i][j].getNum()!=0)
+					  System.out.print(mat[i][j].getNum()+",");
+				  else
+					  System.out.print("_,");
+			  }
+			  System.out.println();
+		  }
+		  System.out.println();
+	  }
+
 
 }
